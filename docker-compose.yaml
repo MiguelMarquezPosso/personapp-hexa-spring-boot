@@ -56,6 +56,8 @@ services:
       - MONGODB_USER=root
       - MONGODB_PASSWORD=example
       - APP_TYPE=/cli/app.jar
+    stdin_open: true
+    tty: true
     depends_on:
       - mariadb
       - mongo

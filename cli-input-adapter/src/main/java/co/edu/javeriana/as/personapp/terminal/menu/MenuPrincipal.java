@@ -1,21 +1,34 @@
 package co.edu.javeriana.as.personapp.terminal.menu;
 
 import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import co.edu.javeriana.as.personapp.terminal.adapter.EstudioInputAdapterCli;
 import co.edu.javeriana.as.personapp.terminal.adapter.PersonaInputAdapterCli;
+import co.edu.javeriana.as.personapp.terminal.adapter.ProfesionInputAdapterCli;
+import co.edu.javeriana.as.personapp.terminal.adapter.TelefonoInputAdapterCli;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
 public class MenuPrincipal {
-	
-	//Beans
+
+	// Beans
 	@Autowired
 	private PersonaInputAdapterCli personaInputAdapterCli;
+
+	@Autowired
+	private ProfesionInputAdapterCli profesionInputAdapterCli;
+
+	@Autowired
+	private TelefonoInputAdapterCli telefonoInputAdapterCli;
+
+	@Autowired
+	private EstudioInputAdapterCli estudioInputAdapterCli;
 
 	private static final int SALIR = 0;
 	private static final int MODULO_PERSONA = 1;
@@ -23,41 +36,50 @@ public class MenuPrincipal {
 	private static final int MODULO_TELEFONO = 3;
 	private static final int MODULO_ESTUDIO = 4;
 
-	//Menus
+	// Menus
 	private final PersonaMenu personaMenu;
+	private final ProfesionMenu profesionMenu;
+	private final TelefonoMenu telefonoMenu;
+	private final EstudioMenu estudioMenu;
 	private final Scanner keyboard;
 
-    public MenuPrincipal() {
-        this.personaMenu = new PersonaMenu();
-        this.keyboard = new Scanner(System.in);
-    }
+	public MenuPrincipal() {
+		this.personaMenu = new PersonaMenu();
+		this.profesionMenu = new ProfesionMenu();
+		this.telefonoMenu = new TelefonoMenu();
+		this.estudioMenu = new EstudioMenu();
+		this.keyboard = new Scanner(System.in);
+	}
 
 	public void inicio() {
-		
-		//personaMenu = new PersonaMenu(personaInputAdapterCli);
+
+		// personaMenu = new PersonaMenu(personaInputAdapterCli);
 		boolean isValid = false;
 		do {
 			mostrarMenu();
 			int opcion = leerOpcion();
 			switch (opcion) {
-			case SALIR:
-				isValid = true;
-				break;
-			case MODULO_PERSONA:
-				personaMenu.iniciarMenu(personaInputAdapterCli, keyboard);
-				log.info("volvio");
-				break;
-			case MODULO_PROFESION:
-				log.warn("Implementar Menu");
-				break;
-			case MODULO_TELEFONO:
-				log.warn("Implementar Menu");
-				break;
-			case MODULO_ESTUDIO:
-				log.warn("Implementar Menu");
-				break;
-			default:
-				log.warn("La opción elegida no es válida.");
+				case SALIR:
+					isValid = true;
+					break;
+				case MODULO_PERSONA:
+					personaMenu.iniciarMenu(personaInputAdapterCli, keyboard);
+					log.info("volvio");
+					break;
+				case MODULO_PROFESION:
+					profesionMenu.iniciarMenu(profesionInputAdapterCli, keyboard);
+					log.info("volvio");
+					break;
+				case MODULO_TELEFONO:
+					telefonoMenu.iniciarMenu(telefonoInputAdapterCli, keyboard);
+					log.info("volvio");
+					break;
+				case MODULO_ESTUDIO:
+					estudioMenu.iniciarMenu(estudioInputAdapterCli, keyboard);
+					log.info("volvio");
+					break;
+				default:
+					log.warn("La opción elegida no es válida.");
 			}
 
 		} while (!isValid);
@@ -79,7 +101,12 @@ public class MenuPrincipal {
 			return keyboard.nextInt();
 		} catch (InputMismatchException e) {
 			log.warn("Solo se permiten números.");
+			keyboard.nextLine(); // Limpiar el buffer
 			return leerOpcion();
+		} catch (NoSuchElementException e) {
+			log.error("No hay entrada disponible. La aplicación se cerrará.");
+			System.exit(0);
+			return SALIR; // Nunca se ejecutará, pero necesario para compilación
 		}
 	}
 
