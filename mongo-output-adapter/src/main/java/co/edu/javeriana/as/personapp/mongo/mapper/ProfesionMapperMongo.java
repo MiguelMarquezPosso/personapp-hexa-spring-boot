@@ -42,7 +42,8 @@ public class ProfesionMapperMongo {
 		profession.setIdentification(profesionDocument.getId());
 		profession.setName(profesionDocument.getNom());
 		profession.setDescription(validateDescription(profesionDocument.getDes()));
-		profession.setStudies(validateStudies(profesionDocument.getEstudios()));
+        // EVITAR relaciones circulares
+        profession.setStudies(new ArrayList<>());
 		return profession;
 	}
 

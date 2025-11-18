@@ -53,12 +53,32 @@ public class EstudiosMapperMongo {
 	}
 
 	public Study fromAdapterToDomain(EstudiosDocument estudiosDocument) {
-		Study study = new Study();
-		study.setPerson(personaMapperMongo.fromAdapterToDomain(estudiosDocument.getPrimaryPersona()));
-		study.setProfession(profesionMapperMongo.fromAdapterToDomain(estudiosDocument.getPrimaryProfesion()));
-		study.setGraduationDate(validateGraduationDate(estudiosDocument.getFecha()));
-		study.setUniversityName(validateUniversityName(estudiosDocument.getUniver()));
-		return null;
+        Study study = new Study();
+
+        // Persona básica CON VALIDACIÓN PARA ID NULL
+        if (estudiosDocument.getPrimaryPersona() != null &&
+                estudiosDocument.getPrimaryPersona().getId() != null) { // ← AÑADE ESTA VALIDACIÓN
+
+            Person person = new Person();
+            person.setIdentification(estudiosDocument.getPrimaryPersona().getId());
+            person.setFirstName(estudiosDocument.getPrimaryPersona().getNombre());
+            person.setLastName(estudiosDocument.getPrimaryPersona().getApellido());
+            study.setPerson(person);
+        }
+
+        // Profesión básica CON VALIDACIÓN PARA ID NULL
+        if (estudiosDocument.getPrimaryProfesion() != null &&
+                estudiosDocument.getPrimaryProfesion().getId() != null) { // ← AÑADE ESTA VALIDACIÓN
+
+            Profession profession = new Profession();
+            profession.setIdentification(estudiosDocument.getPrimaryProfesion().getId());
+            profession.setName(estudiosDocument.getPrimaryProfesion().getNom());
+            study.setProfession(profession);
+        }
+
+        study.setGraduationDate(validateGraduationDate(estudiosDocument.getFecha()));
+        study.setUniversityName(validateUniversityName(estudiosDocument.getUniver()));
+        return study;
 	}
 
 	private LocalDate validateGraduationDate(LocalDate fecha) {

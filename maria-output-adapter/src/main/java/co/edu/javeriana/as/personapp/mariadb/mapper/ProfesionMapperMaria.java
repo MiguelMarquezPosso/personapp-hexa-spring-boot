@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import co.edu.javeriana.as.personapp.domain.Gender;
+import co.edu.javeriana.as.personapp.domain.Person;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import co.edu.javeriana.as.personapp.common.annotations.Mapper;
@@ -42,7 +45,9 @@ public class ProfesionMapperMaria {
 		profession.setIdentification(profesionEntity.getId());
 		profession.setName(profesionEntity.getNom());
 		profession.setDescription(validateDescription(profesionEntity.getDes()));
-		profession.setStudies(validateStudies(profesionEntity.getEstudios()));
+        // EVITAR relaciones circulares
+        profession.setStudies(new ArrayList<>());
+
 		return profession;
 	}
 
@@ -55,4 +60,8 @@ public class ProfesionMapperMaria {
 				.map(estudio -> estudiosMapperMaria.fromAdapterToDomain(estudio)).collect(Collectors.toList())
 				: new ArrayList<Study>();
 	}
+
+    private @NonNull Gender validateGender(Character genero) {
+        return genero == 'F' ? Gender.FEMALE : genero == 'M' ? Gender.MALE : Gender.OTHER;
+    }
 }

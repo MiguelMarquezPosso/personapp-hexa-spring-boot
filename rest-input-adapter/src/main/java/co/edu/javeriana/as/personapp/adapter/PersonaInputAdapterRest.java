@@ -13,7 +13,6 @@ import co.edu.javeriana.as.personapp.application.usecase.PersonUseCase;
 import co.edu.javeriana.as.personapp.common.annotations.Adapter;
 import co.edu.javeriana.as.personapp.common.exceptions.InvalidOptionException;
 import co.edu.javeriana.as.personapp.common.setup.DatabaseOption;
-import co.edu.javeriana.as.personapp.domain.Gender;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.mapper.PersonaMapperRest;
 import co.edu.javeriana.as.personapp.model.request.PersonaRequest;
@@ -68,14 +67,66 @@ public class PersonaInputAdapterRest {
 
 	public PersonaResponse crearPersona(PersonaRequest request) {
 		try {
-			setPersonOutputPortInjection(request.getDatabase());
+			String db = setPersonOutputPortInjection(request.getDatabase());
 			Person person = personInputPort.create(personaMapperRest.fromAdapterToDomain(request));
-			return personaMapperRest.fromDomainToAdapterRestMaria(person);
+			return db.equalsIgnoreCase(DatabaseOption.MARIA.toString()) 
+					? personaMapperRest.fromDomainToAdapterRestMaria(person)
+					: personaMapperRest.fromDomainToAdapterRestMongo(person);
 		} catch (InvalidOptionException e) {
 			log.warn(e.getMessage());
-			//return new PersonaResponse("", "", "", "", "", "", "");
+			return null;
+		} catch (Exception e) {
+			log.error("Error al crear persona: " + e.getMessage());
+			return null;
 		}
-		return null;
+	}
+
+	public PersonaResponse editarPersona(Integer cc, PersonaRequest request) {
+		try {
+			String db = setPersonOutputPortInjection(request.getDatabase());
+			Person person = personaMapperRest.fromAdapterToDomain(request);
+			person.setIdentification(cc);
+			Person edited = personInputPort.edit(cc, person);
+			return db.equalsIgnoreCase(DatabaseOption.MARIA.toString())
+					? personaMapperRest.fromDomainToAdapterRestMaria(edited)
+					: personaMapperRest.fromDomainToAdapterRestMongo(edited);
+		} catch (Exception e) {
+			log.error("Error al editar persona: " + e.getMessage());
+			return null;
+		}
+	}
+
+	public Boolean eliminarPersona(Integer cc, String database) {
+		try {
+			setPersonOutputPortInjection(database);
+			return personInputPort.drop(cc);
+		} catch (Exception e) {
+			log.error("Error al eliminar persona: " + e.getMessage());
+			return false;
+		}
+	}
+
+	public PersonaResponse buscarPersonaPorId(Integer cc, String database) {
+		try {
+			String db = setPersonOutputPortInjection(database);
+			Person person = personInputPort.findOne(cc);
+			return db.equalsIgnoreCase(DatabaseOption.MARIA.toString())
+					? personaMapperRest.fromDomainToAdapterRestMaria(person)
+					: personaMapperRest.fromDomainToAdapterRestMongo(person);
+		} catch (Exception e) {
+			log.error("Error al buscar persona: " + e.getMessage());
+			return null;
+		}
+	}
+
+	public Integer contarPersonas(String database) {
+		try {
+			setPersonOutputPortInjection(database);
+			return personInputPort.count();
+		} catch (Exception e) {
+			log.error("Error al contar personas: " + e.getMessage());
+			return 0;
+		}
 	}
 
 }
