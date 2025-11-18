@@ -1,5 +1,6 @@
 package co.edu.javeriana.as.personapp.mongo.mapper;
 
+import co.edu.javeriana.as.personapp.domain.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import co.edu.javeriana.as.personapp.common.annotations.Mapper;
@@ -31,8 +32,16 @@ public class TelefonoMapperMongo {
 		Phone phone = new Phone();
 		phone.setNumber(telefonoDocument.getId());
 		phone.setCompany(telefonoDocument.getOper());
-		phone.setOwner(validateOwner(telefonoDocument.getPrimaryDuenio()));
-		return phone;
+        if (telefonoDocument.getPrimaryDuenio() != null &&
+                telefonoDocument.getPrimaryDuenio().getId() != null) {
+
+            Person owner = new Person();
+            owner.setIdentification(telefonoDocument.getPrimaryDuenio().getId());
+            owner.setFirstName(telefonoDocument.getPrimaryDuenio().getNombre());
+            owner.setLastName(telefonoDocument.getPrimaryDuenio().getApellido());
+            phone.setOwner(owner);
+        }
+            return phone;
 	}
 
 	private @NonNull Person validateOwner(PersonaDocument duenio) {
